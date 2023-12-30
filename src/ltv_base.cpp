@@ -18,6 +18,21 @@ ZZ_pE ltv_base::SampleMessage(){
   return res;
 }
 
+void ltv_base::SampleFeature(long size, ZZ_pE *r1, ZZ_pE *r2){
+  int i, mm;
+  //ZZ_pE res;
+  ZZ_pX pol1;
+  ZZ_pX pol2;
+  for(i=0;i<size;i++){
+    mm = rand()%2;
+    SetCoeff(pol1, i, conv<ZZ_p>(mm));
+    SetCoeff(pol2, size-i-1, conv<ZZ_p>(mm));
+  }
+  *r1 = conv<ZZ_pE>(pol1);
+  *r2 = conv<ZZ_pE>(pol2);
+  return;
+}
+
 ZZ_pE ltv_base::SampleMessage256(){
   int i, mm;
   ZZ_pE res;
@@ -48,7 +63,7 @@ ZZ_pE ltv_base::SampleErr(){
   ZZ_pX pol;
   long i;
   double randNormal, randStdNormal;
-  for(i = 0; i <= this->n; i=i++){
+  for(i = 0; i <= this->n; i++){
     double u1 = ((double) rand()) / (RAND_MAX); 
     double u2 = ((double) rand()) / (RAND_MAX); 
     u2 *= 6.2831;

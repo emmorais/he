@@ -8,7 +8,7 @@ using namespace NTL;
 
 #define NUM 10
 #define N 1024
-#define Q 157
+#define Q 257
 #define T 1024
 #define W 2
 #define E 0
@@ -418,11 +418,68 @@ void lheTiming(){
 
 }
 
+bool lheIrisTest(){
+  clock_t start, end;
+  double elapsed;
+  int count=0, ok=0, nok=0;
+  long lwq = Q + 1;
+  double delta = 1;
+  long n = N;
+  long t = T;
+  long w = W;
+  long e = E;
+  ltv *fnord;
+  ZZ q ;
+  GenPrime(q, Q);
+  ZZ_p::init(q);
+  ZZ_pX P;
+  SetCoeff(P, 0, 1);
+  SetCoeff(P, n, 1);
+  ZZ_pE::init(P);
+  fnord = new ltv();
+  fnord->ParamsGen(t, w, e, n, q, delta, lwq);
+  while(count < NUM){
+    fnord->KeyGen();
+    ZZ_pE m1, m1_inv, m2, m2_inv;
+    fnord->b->SampleFeature(10, &m1, &m1_inv);
+    fnord->b->SampleFeature(10, &m2, &m2_inv);
+    cout << "m1" << m1 << "\n";
+    cout << "m1_inv" << m1_inv << "\n";
+    cout << "m2" << m2 << "\n";
+    cout << "m2_inv" << m2_inv << "\n";
+    ZZ_pE c1 = fnord->Encrypt(m1);
+    ZZ_pE c1_inv = fnord->Encrypt(m1_inv);
+    ZZ_pE c2 = fnord->Encrypt(m2);
+    ZZ_pE c2_inv = fnord->Encrypt(m2_inv);
+
+    start = clock();
+    ZZ_pE cmul = fnord->Mult(c1-c2,c1_inv-c2_inv,q);
+    ZZ_pE kcmul= fnord->KeySwitch(cmul);
+    end = clock();
+    ZZ_pE mm = fnord->Decrypt(kcmul);
+    elapsed = ((double) (end - start)) / CLOCKS_PER_SEC;
+    cout << "time iris: " << elapsed << " secs\n";
+    cout << "mm" << mm << "\n";
+
+    ZZ_pX pol = conv<ZZ_pX>(mm);
+    cout << "Hamming distance: " << coeff(pol, 9) << "\n";
+    /*if (fnord->ModN(m1+m2, t) == mm){
+      ok++;
+    }
+    else{
+      nok++;
+    }*/
+    count++;
+  }
+  int result = (ok == count);
+  return result;
+}
+
 
 
 int main(){
   srand (time(NULL));
-  bool t1 = rheTest();
+  /*bool t1 = rheTest();
   cout << FGRN("Base LTV Encryption/Decryption test result: ") << (t1 ? BOLD(FGRN("True")) : BOLD(FRED("False"))) << "\n";
   bool t2 = rheAddTest();
   cout << FGRN("Base LTV Addition Homomorphism test result: ") << (t1 ? BOLD(FGRN("True")) : BOLD(FRED("False"))) << "\n";
@@ -438,5 +495,8 @@ int main(){
   cout << FGRN("LTV Homomorphism over reals test result: ") << (t1 ? BOLD(FGRN("True")) : BOLD(FRED("False"))) << "\n";
   bool t8 = lheRotTest();
   cout << FGRN("LTV Rotation test result: ") << (t1 ? BOLD(FGRN("True")) : BOLD(FRED("False"))) << "\n";
+  lheTiming();*/
+  bool t_iris = lheIrisTest();
+  cout << FGRN("Base LTV Iris Matching Homomorphism test result: ") << (t_iris ? BOLD(FGRN("True")) : BOLD(FRED("False"))) << "\n";
   return 0;
 }

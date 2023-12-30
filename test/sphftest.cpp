@@ -108,7 +108,7 @@ bool mpsphfTest(){
   ZZ q;
   Vec<ZZ_p> w;
   Vec<ZZ_p> Ap;
-  Vec<ZZ_p> s;
+  Mat<ZZ_p> s;
   Vec<ZZ_p> e;
 
   GenPrime(q, 9);
@@ -122,8 +122,8 @@ bool mpsphfTest(){
     scheme->HashKG();
     scheme->ProjKG();
     
-    s = scheme_mp->SampleR();
-    s[0] = 1;
+    s = scheme_mp->SampleR(n, m);
+    s[0][0] = 1;
     cout << "s:     " << s << ";\n";
     e = scheme_mp->SampleNoiseArray(scheme_mp->A.NumCols());
     Vec<ZZ_p> m = scheme_mp->SampleMessage();
@@ -131,14 +131,14 @@ bool mpsphfTest(){
     m[7] = 0;
     m[6] = 0;
 
-    Vec<ZZ_p> c = scheme_mp->EncryptR(m, s, e);
+    Vec<ZZ_p> c = scheme_mp->EncryptR(m, s[0], e);
     Vec<ZZ_p> mm = scheme_mp->Decrypt(c);
     cout << "c:  " << c << ";\n";
     cout << "m:  " << m << ";\n";
     cout << "mm: " << mm << ";\n";
     
     b = scheme->Hash(c, m); 
-    bb = scheme->ProjHash(c, m, s);
+    bb = scheme->ProjHash(c, m, s[0]);
     
     cout << "Hash:     " << b << ";\n";
     cout << "ProjHash: " << bb << ";\n";
